@@ -1,0 +1,57 @@
+﻿@page "/myorders"
+@using BlazingPizza.Shared.Constants
+@layout MainLayout
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<Header/>
+
+<div class="main">
+    @if (ordersWithStatus == null)
+    {
+        <text>Carregando...</text>
+    }
+    else if (!ordersWithStatus.Any())
+    {
+        <h2>Nenhum pedido encontrado</h2>
+        <a class="btn btn-success" href="">Escolha alguma pizza</a>
+    }
+    else
+    {
+        <div class="list-group orders-list">
+            @foreach (var item in ordersWithStatus)
+            {
+                <div class="list-group-item">
+                    <div class="col">
+                        <h5>@item.Order.CreatedTime.ToLongDateString()</h5>
+                        Itens:
+                        <strong>@item.Order.Pizzas.Count()</strong>;
+                        Preço Total:
+                        <strong>£@item.Order.GetFormattedTotalPrice()</strong>
+                    </div>
+                    <div class="col">
+                        Situação: <strong>@item.StatusText</strong>
+                    </div>
+                    @if (@item.StatusText != StatusConstants.Entregue)
+                    {
+                        <div class="col flex-grow-0">
+                            <a href="myorders/@item.Order.OrderId" class="btn btn-success">
+                                Track &gt;
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    List<OrderWithStatus> ordersWithStatus = new List<OrderWithStatus>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        ordersWithStatus = await HttpClient.GetFromJsonAsync<List<OrderWithStatus>>(
+            $"{NavigationManager.BaseUri}orders");
+    }
+}

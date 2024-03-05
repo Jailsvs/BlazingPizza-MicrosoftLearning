@@ -1,4 +1,6 @@
-﻿namespace BlazingPizza;
+﻿using BlazingPizza.Shared.Constants;
+
+namespace BlazingPizza;
 
 public class OrderWithStatus
 {
@@ -9,7 +11,7 @@ public class OrderWithStatus
 
     public string StatusText { get; set; }
 
-    public bool IsDelivered => StatusText == "Delivered";
+    public bool IsDelivered => StatusText == StatusConstants.Entregue;
 
     public static OrderWithStatus FromOrder(Order order)
     {
@@ -20,15 +22,15 @@ public class OrderWithStatus
 
         if (DateTime.Now < dispatchTime)
         {
-            statusText = "Preparing";
+            statusText = StatusConstants.EmPreparo;
         }
         else if (DateTime.Now < dispatchTime + DeliveryDuration)
         {
-            statusText = "Out for delivery";
+            statusText = StatusConstants.SaiuEntrega;
         }
         else
         {
-            statusText = "Delivered";
+            statusText = StatusConstants.Entregue;
         }
 
         return new OrderWithStatus

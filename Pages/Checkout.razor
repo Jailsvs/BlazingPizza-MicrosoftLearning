@@ -1,0 +1,55 @@
+﻿@page "/checkout"
+@layout MainLayout
+@inject OrderState OrderState
+@inject HttpClient HttpClient
+@inject NavigationManager NavigationManager
+
+<div class="main">
+    <EditForm Model=Order.DeliveryAddress OnSubmit=CheckSubmission>
+        <div class="checkout-cols">
+            <div class="checkout-order-details">
+                <h4>Revisar pedido</h4>
+                <OrderReview Order="Order" />
+            </div>
+
+            <div class="checkout-delivery-address">
+                <h4>Entregar para...</h4>
+                @if (isError) 
+                {
+                    <div class="alert alert-danger">Por favor, insira seu nome e endereço.</div>
+                }
+                <AddressEditor Address="Order.DeliveryAddress" />
+            </div>
+        </div>
+
+        <button class="checkout-button btn btn-warning" disabled=@isSubmitting>
+            Concluir encomenda
+        </button>
+    </EditForm>
+</div>
+
+@code {
+    Order Order => OrderState.Order;
+    bool isSubmitting;
+    bool isError = false;
+
+    async Task PlaceOrder()
+    {
+        var response = await HttpClient.PostAsJsonAsync(NavigationManager.BaseUri + "orders", OrderState.Order);
+        var newOrderId = await response.Content.ReadFromJsonAsync<int>();
+        OrderState.ResetOrder();
+        NavigationManager.NavigateTo($"myorders/{newOrderId}");
+    }
+
+    private async Task CheckSubmission(EditContext editContext)
+    {
+        isSubmitting = true;
+        var model = editContext.Model as Address;
+        isError = string.IsNullOrWhiteSpace(model?.Name)
+            || string.IsNullOrWhiteSpace(model?.Line1)
+            || string.IsNullOrWhiteSpace(model?.PostalCode);
+        if (!isError)
+            await PlaceOrder();
+        isSubmitting = false;
+    }
+}

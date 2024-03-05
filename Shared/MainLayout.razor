@@ -1,0 +1,15 @@
+﻿@inherits LayoutComponentBase
+
+<div id="app">
+
+    <BlazingPizza.Pages.Header/>
+
+    <div class="content">
+        @Body
+    </div>
+
+    <footer>
+        &copy; Blazing Pizza @DateTime.UtcNow.Year
+    </footer>
+
+</div>
